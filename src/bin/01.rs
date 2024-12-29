@@ -24,7 +24,7 @@ fn parse_modules(input: &str) -> Vec<u32> {
 }
 
 // Add up the fuel required for all modules.
-fn get_fuel_required_for_modules(modules: &Vec<u32>) -> u32 {
+fn get_fuel_required_for_modules(modules: &[u32]) -> u32 {
     // For each module, calculate fuel required and total them all.
     modules
         .iter()
@@ -33,7 +33,7 @@ fn get_fuel_required_for_modules(modules: &Vec<u32>) -> u32 {
 }
 
 // Add up the fuel required for all modules and fuel.
-fn get_fuel_required_for_modules_and_fuel(modules: &Vec<u32>) -> u32 {
+fn get_fuel_required_for_modules_and_fuel(modules: &[u32]) -> u32 {
     modules
         .iter()
         .map(|mass| {
