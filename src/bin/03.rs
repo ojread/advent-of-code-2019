@@ -13,7 +13,7 @@ pub fn part_one(input: &str) -> Option<i32> {
 
     let intersections = find_intersections(path1, path2);
 
-    let origin = Point::new(0, 0);
+    let origin = Point { x: 0, y: 0 };
 
     let shortest_distance = intersections
         .iter()
@@ -47,12 +47,6 @@ struct Point {
     y: i32,
 }
 
-impl Point {
-    fn new(x: i32, y: i32) -> Self {
-        Point { x, y }
-    }
-}
-
 fn parse_instructions(input: &str) -> Vec<Instruction> {
     input
         .split(",")
@@ -74,10 +68,10 @@ fn parse_instructions(input: &str) -> Vec<Instruction> {
 
 fn calculate_path(instructions: Vec<Instruction>) -> Vec<Point> {
     // Track position as we trace the path.
-    let mut pos = Point::new(0, 0);
+    let mut pos = Point { x: 0, y: 0 };
     let mut points = Vec::new();
 
-    for instruction in instructions.clone() {
+    for instruction in instructions {
         let length = instruction.length as i32;
         match instruction.dir {
             Direction::Up => {
@@ -120,9 +114,9 @@ fn find_intersections(path1: Vec<Point>, path2: Vec<Point>) -> Vec<Point> {
             // Lines intersect if their x and y ranges overlap.
             if x1 <= x4 && x3 <= x2 && y1 <= y4 && y3 <= y2 {
                 if x1 == x2 && y3 == y4 {
-                    intersections.push(Point::new(x1, y3));
+                    intersections.push(Point { x: x1, y: y3 });
                 } else if x3 == x4 && y1 == y2 {
-                    intersections.push(Point::new(x3, y1));
+                    intersections.push(Point { x: x3, y: y1 });
                 }
             }
         }
