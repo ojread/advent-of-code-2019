@@ -1,4 +1,4 @@
-use std::cmp;
+use std::cmp::{max, min};
 
 advent_of_code::solution!(3);
 
@@ -11,20 +11,37 @@ pub fn part_one(input: &str) -> Option<i32> {
     let instructions2 = parse_instructions(input_lines[1]);
     let path2 = calculate_path(instructions2);
 
-    let intersections = find_intersections(path1, path2);
+    let intersections = find_intersections(&path1, &path2);
 
     let origin = Point { x: 0, y: 0 };
 
     let shortest_distance = intersections
         .iter()
-        .map(|intersection| get_distance(origin, *intersection))
+        .map(|intersection| get_distance(&origin, intersection))
         .min();
 
     shortest_distance
 }
 
-pub fn part_two(_input: &str) -> Option<u64> {
-    None
+pub fn part_two(input: &str) -> Option<u32> {
+    let input_lines: Vec<_> = input.lines().collect();
+
+    let instructions1 = parse_instructions(input_lines[0]);
+    let instructions2 = parse_instructions(input_lines[1]);
+
+    let path1 = calculate_path(instructions1);
+    let path2 = calculate_path(instructions2);
+
+    let intersections = find_intersections(&path1, &path2);
+
+    let shortest_steps = intersections
+        .iter()
+        .map(|intersection| {
+            get_path_steps(&path1, intersection) + get_path_steps(&path2, intersection)
+        })
+        .min();
+
+    shortest_steps
 }
 
 #[derive(Clone, Debug)]
@@ -69,7 +86,9 @@ fn parse_instructions(input: &str) -> Vec<Instruction> {
 fn calculate_path(instructions: Vec<Instruction>) -> Vec<Point> {
     // Track position as we trace the path.
     let mut pos = Point { x: 0, y: 0 };
-    let mut points = Vec::new();
+
+    // Paths start with the origin point.
+    let mut points = vec![Point { x: 0, y: 0 }];
 
     for instruction in instructions {
         let length = instruction.length as i32;
@@ -92,24 +111,24 @@ fn calculate_path(instructions: Vec<Instruction>) -> Vec<Point> {
     points
 }
 
-fn find_intersections(path1: Vec<Point>, path2: Vec<Point>) -> Vec<Point> {
+fn find_intersections(path1: &Vec<Point>, path2: &Vec<Point>) -> Vec<Point> {
     let mut intersections: Vec<Point> = Vec::new();
 
     for i in 0..path1.len() - 1 {
         let a = path1[i];
         let b = path1[i + 1];
-        let x1 = cmp::min(a.x, b.x);
-        let y1 = cmp::min(a.y, b.y);
-        let x2 = cmp::max(a.x, b.x);
-        let y2 = cmp::max(a.y, b.y);
+        let x1 = min(a.x, b.x);
+        let y1 = min(a.y, b.y);
+        let x2 = max(a.x, b.x);
+        let y2 = max(a.y, b.y);
 
         for j in 0..path2.len() - 1 {
             let c = path2[j];
             let d = path2[j + 1];
-            let x3 = cmp::min(c.x, d.x);
-            let y3 = cmp::min(c.y, d.y);
-            let x4 = cmp::max(c.x, d.x);
-            let y4 = cmp::max(c.y, d.y);
+            let x3 = min(c.x, d.x);
+            let y3 = min(c.y, d.y);
+            let x4 = max(c.x, d.x);
+            let y4 = max(c.y, d.y);
 
             // Lines intersect if their x and y ranges overlap.
             if x1 <= x4 && x3 <= x2 && y1 <= y4 && y3 <= y2 {
@@ -125,8 +144,46 @@ fn find_intersections(path1: Vec<Point>, path2: Vec<Point>) -> Vec<Point> {
     intersections
 }
 
-fn get_distance(point1: Point, point2: Point) -> i32 {
-    (point1.x + point2.x).abs() + (point1.y + point2.y).abs()
+fn get_distance(point1: &Point, point2: &Point) -> i32 {
+    (point1.x - point2.x).abs() + (point1.y - point2.y).abs()
+}
+
+fn get_path_steps(path: &Vec<Point>, target: &Point) -> u32 {
+    let mut steps: i32 = 0;
+
+    let mut path = path.iter().peekable();
+
+    let mut done = false;
+
+    while let Some(point1) = path.next() {
+        if !done {
+            if let Some(point2) = path.peek() {
+                if !done {
+                    // Is the target point between point1 and point2?
+                    if target.x == point1.x
+                        && target.x == point2.x
+                        && target.y > min(point1.y, point2.y)
+                        && target.y < max(point1.y, point2.y)
+                    {
+                        steps += get_distance(&point1, &target);
+                        done = true;
+                    } else if target.y == point1.y
+                        && target.y == point2.y
+                        && target.x > min(point1.x, point2.x)
+                        && target.x < max(point1.x, point2.x)
+                    {
+                        steps += get_distance(&point1, &target);
+                        done = true;
+                    } else {
+                        // Otherwise add the steps between the two points.
+                        steps += get_distance(&point1, &point2);
+                    }
+                }
+            }
+        }
+    }
+
+    steps as u32
 }
 
 #[cfg(test)]
@@ -142,6 +199,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let result = part_two(&advent_of_code::template::read_file("examples", DAY));
-        assert_eq!(result, None);
+        assert_eq!(result, Some(610));
     }
 }
