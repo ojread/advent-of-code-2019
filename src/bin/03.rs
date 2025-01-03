@@ -111,7 +111,7 @@ fn calculate_path(instructions: Vec<Instruction>) -> Vec<Point> {
     points
 }
 
-fn find_intersections(path1: &Vec<Point>, path2: &Vec<Point>) -> Vec<Point> {
+fn find_intersections(path1: &[Point], path2: &[Point]) -> Vec<Point> {
     let mut intersections: Vec<Point> = Vec::new();
 
     for i in 0..path1.len() - 1 {
@@ -148,7 +148,7 @@ fn get_distance(point1: &Point, point2: &Point) -> i32 {
     (point1.x - point2.x).abs() + (point1.y - point2.y).abs()
 }
 
-fn get_path_steps(path: &Vec<Point>, target: &Point) -> u32 {
+fn get_path_steps(path: &[Point], target: &Point) -> u32 {
     let mut steps: i32 = 0;
 
     let mut path = path.iter().peekable();
@@ -160,23 +160,20 @@ fn get_path_steps(path: &Vec<Point>, target: &Point) -> u32 {
             if let Some(point2) = path.peek() {
                 if !done {
                     // Is the target point between point1 and point2?
-                    if target.x == point1.x
+                    if (target.x == point1.x
                         && target.x == point2.x
                         && target.y > min(point1.y, point2.y)
-                        && target.y < max(point1.y, point2.y)
+                        && target.y < max(point1.y, point2.y))
+                        || (target.y == point1.y
+                            && target.y == point2.y
+                            && target.x > min(point1.x, point2.x)
+                            && target.x < max(point1.x, point2.x))
                     {
-                        steps += get_distance(&point1, &target);
-                        done = true;
-                    } else if target.y == point1.y
-                        && target.y == point2.y
-                        && target.x > min(point1.x, point2.x)
-                        && target.x < max(point1.x, point2.x)
-                    {
-                        steps += get_distance(&point1, &target);
+                        steps += get_distance(point1, target);
                         done = true;
                     } else {
                         // Otherwise add the steps between the two points.
-                        steps += get_distance(&point1, &point2);
+                        steps += get_distance(point1, point2);
                     }
                 }
             }

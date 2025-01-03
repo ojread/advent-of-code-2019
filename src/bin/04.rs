@@ -12,14 +12,12 @@ impl Password {
         let d4 = ((int / 10) % 10) as u8;
         let d5 = (int % 10) as u8;
 
-        Self {
-            0: [d0, d1, d2, d3, d4, d5],
-        }
+        Self([d0, d1, d2, d3, d4, d5])
     }
 
     // Increment to the next feasible password.
     fn inc(&mut self) {
-        for i in (0..6).into_iter().rev() {
+        for i in (0..6).rev() {
             self.0[i] += 1;
             if self.0[i] != 10 {
                 return;
@@ -71,10 +69,8 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut count: u32 = 0;
 
     loop {
-        if does_not_decrease(&test) {
-            if has_double_digits(&test) {
-                count += 1;
-            }
+        if does_not_decrease(&test) && has_double_digits(&test) {
+            count += 1;
         }
 
         test.inc();
@@ -97,10 +93,8 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut count: u32 = 0;
 
     loop {
-        if does_not_decrease(&test) {
-            if has_double_digits_only(&test) {
-                count += 1;
-            }
+        if does_not_decrease(&test) && has_double_digits_only(&test) {
+            count += 1;
         }
 
         test.inc();
